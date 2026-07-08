@@ -44,9 +44,10 @@ pipeline {
                 echo 'Executing Snakemake pipeline via Kubernetes Pods...'
                 sh 'rm -rf results/*'
                 
-                // 【核心修正】添加 --container-image ${DOCKER_IMAGE}
-                // 这会强制 K8s Pod 直接在本地拉起你刚刚 build 好的 guangqi99/bio-script:1.0 镜像，彻底阻断任何外网拉取超时
-                sh "snakemake --cores 3 --jobs 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs --container-image ${DOCKER_IMAGE}"
+                // 【终极通关参数】
+                // 我们在末尾追加了: --k8s-image-pull-policy Never
+                // 这将彻底斩断 K8s 联网拉取镜像的念头，强迫其读取本地 Minikube 环境里刚刚编译好的缓存，实现毫秒级瞬间开机！
+                sh "snakemake --cores 3 --jobs 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs --container-image ${DOCKER_IMAGE} --k8s-image-pull-policy Never"
                 
                 echo 'Printing final validation reports from Kubernetes calculation:'
                 sh 'cat results/sample1_gc.txt'
@@ -54,7 +55,6 @@ pipeline {
                 sh 'cat results/sample3_gc.txt'
             }
         }
-
     }
 }
 
