@@ -1,14 +1,22 @@
-# Dockerfile
-FROM python:3.10-slim
+# Snakefile
 
-WORKDIR /app
+SAMPLES = ["sample1", "sample2", "sample3"]
 
-# 1. Copy your python script into the container
-COPY count_bases.py /app/count_bases.py
+rule all:
+    input:
+        expand("results/{sample}_gc.txt", sample=SAMPLES)
 
-# 2. FIX: Copy your test data folder directly into the container as well
-COPY data/ /app/data/
-
-# Set the entrypoint to execute the script
-ENTRYPOINT ["python", "/app/count_bases.py"]
+rule calculate_gc:
+    input:
+        fasta = "data/{sample}.fasta"
+    output:
+        report = "results/{sample}_gc.txt"
+    resources:
+        # FIX: Changed from 0 to 1 (or 0.5) to satisfy the Kubernetes API resource schema
+        kubernetes_cpu = 1,
+        kubernetes_mem = "256M"
+    container:
+        "docker://guangqi99/bio-script:1.0"
+    shell:
+        "python /app/count_bases.py {input.fasta} {output.report}"
 
