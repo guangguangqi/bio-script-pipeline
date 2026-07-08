@@ -17,14 +17,14 @@ pipeline {
         stage('1. Build Docker Image') {
             steps {
                 echo 'Building your bio-script container...'
+                // Clean local build using standard Docker
                 sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
         stage('2. Test Docker Container Directly') {
             steps {
-                echo 'Running a standalone test with built-in data...'
-                // Run the script and let it save inside the container's temporary space
+                echo 'Running a quick standalone test with built-in data...'
                 sh "docker run --rm ${DOCKER_IMAGE} /app/data/sample1.fasta /app/results/sample1_gc.txt"
             }
         }
@@ -39,22 +39,21 @@ pipeline {
             }
         }
 
-        stage('4. Run Snakemake Orchestration on Kubernetes') {
+        stage('4. Run Snakemake Orchestration Locally') {
             steps {
-                echo 'Executing Snakemake pipeline via Kubernetes Pods...'
-                // Clean old test files
+                echo 'Executing Snakemake pipeline using our validated Docker image...'
                 sh 'rm -rf results/*'
                 
-                // Trigger snakemake with the kubernetes executor flag!
-                sh 'snakemake --cores 3 --executor kubernetes'
+                // OPTION 1 FIX: We use standard local execution with no storage dependencies!
+                // We pass --container-image so Snakemake runs the task inside your fresh Docker image
+                sh "snakemake --cores 3 --container-image ${DOCKER_IMAGE}"
                 
-                echo 'Printing final validation reports from Kubernetes calculation:'
+                echo 'Printing final validation reports from Snakemake calculation:'
                 sh 'cat results/sample1_gc.txt'
                 sh 'cat results/sample2_gc.txt'
                 sh 'cat results/sample3_gc.txt'
             }
-        } 
-
+        }
     }
 }
 
