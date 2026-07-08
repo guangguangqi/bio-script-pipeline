@@ -41,12 +41,12 @@ pipeline {
 
         stage('4. Run Snakemake Orchestration') {
             steps {
-                echo 'Executing Snakemake pipeline using our validated image...'
+                echo 'Executing Snakemake pipeline using built-in image assets...'
                 sh 'rm -f results/sample1_gc.txt'
                 
-                // We use standard snakemake execution. 
-                // We mock the execution environment by passing the parameters smoothly.
-                sh "docker run --rm -v \$(pwd)/data:/data -v \$(pwd)/results:/results ${DOCKER_IMAGE} /data/sample1.fasta /results/sample1_gc.txt"
+                // FIX: No more "-v" flags! We let the container read its own internal file.
+                // We use "> results/sample1_gc.txt" on the outside to capture the container's output.
+                sh "docker run --rm ${DOCKER_IMAGE} /app/data/sample1.fasta /app/results/sample1_gc.txt > results/sample1_gc.txt"
                 
                 echo 'Printing final Snakemake report validation:'
                 sh 'cat results/sample1_gc.txt'

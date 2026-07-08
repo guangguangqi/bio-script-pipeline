@@ -1,6 +1,6 @@
 # count_bases.py
 import sys
-import os # Added for safe directory creation
+import os
 
 input_file = sys.argv[1]
 output_file = sys.argv[2]
@@ -15,7 +15,6 @@ c_count = sequence.count('C')
 total = len(sequence)
 gc_content = (g_count + c_count) / total * 100
 
-# FIX: Automatically generate the output folder if it doesn't exist yet
 output_dir = os.path.dirname(output_file)
 if output_dir:
     os.makedirs(output_dir, exist_ok=True)
@@ -25,5 +24,7 @@ with open(output_file, 'w') as out:
     out.write(f"Sequence: {sequence}\n")
     out.write(f"GC Content: {gc_content}%\n")
 
-print(f"Successfully processed {input_file}. GC Content is {gc_content}%.")
+# FIX: Print the exact same format to standard output so Jenkins can capture it easily
+print(f"Sequence: {sequence}")
+print(f"GC Content: {gc_content}%")
 
