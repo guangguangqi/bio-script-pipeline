@@ -1,18 +1,14 @@
-# Use a lightweight official Python image
+# Dockerfile
 FROM python:3.10-slim
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy your python script into the container
-#COPY count_bases.py .
-
+# 1. Copy your python script into the container
 COPY count_bases.py /app/count_bases.py
 
-# CHANGE: Force the container to always execute our script from /app
+# 2. FIX: Copy your test data folder directly into the container as well
+COPY data/ /app/data/
+
+# Set the entrypoint to execute the script
 ENTRYPOINT ["python", "/app/count_bases.py"]
-
-
-# Run the script when the container starts
-#ENTRYPOINT ["python"]
 
