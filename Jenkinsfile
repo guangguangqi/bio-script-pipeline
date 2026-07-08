@@ -24,9 +24,8 @@ pipeline {
         stage('2. Test Docker Container Directly') {
             steps {
                 echo 'Running a standalone test with built-in data...'
-                // FIX: Used standard Groovy double slash (//) instead of hash (#)
-                sh "docker run --rm ${DOCKER_IMAGE} /app/data/sample1.fasta results/sample1_gc.txt"
-                sh 'cat results/sample1_gc.txt'
+                // Run the script and let it save inside the container's temporary space
+                sh "docker run --rm ${DOCKER_IMAGE} /app/data/sample1.fasta /app/results/sample1_gc.txt"
             }
         }
 
