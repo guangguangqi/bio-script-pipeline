@@ -1,3 +1,4 @@
+// Jenkinsfile
 pipeline {
     agent any
 
@@ -23,7 +24,7 @@ pipeline {
         stage('2. Test Docker Container Directly') {
             steps {
                 echo 'Running a standalone test with built-in data...'
-                # FIX: Removed the -v mounts. We output directly to a local path we can read.
+                // FIX: Used standard Groovy double slash (//) instead of hash (#)
                 sh "docker run --rm ${DOCKER_IMAGE} /app/data/sample1.fasta results/sample1_gc.txt"
                 sh 'cat results/sample1_gc.txt'
             }
@@ -43,9 +44,6 @@ pipeline {
             steps {
                 echo 'Executing Snakemake pipeline...'
                 sh 'rm -f results/sample1_gc.txt'
-                
-                # Note: When Snakemake runs with --use-docker, it handles mounting automatically,
-                # but it requires the host to have the files, or it can read them inside.
                 sh 'snakemake --cores 1 --use-docker'
                 sh 'cat results/sample1_gc.txt'
             }
