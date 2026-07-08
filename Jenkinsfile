@@ -44,8 +44,9 @@ pipeline {
                 echo 'Executing Snakemake pipeline via Kubernetes Pods...'
                 sh 'rm -rf results/*'
                 
-                // FIX: Appended `--jobs 3` to satisfy the remote execution guardrail
-                sh 'snakemake --cores 3 --jobs 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs'
+                // 【核心修正】添加 --container-image ${DOCKER_IMAGE}
+                // 这会强制 K8s Pod 直接在本地拉起你刚刚 build 好的 guangqi99/bio-script:1.0 镜像，彻底阻断任何外网拉取超时
+                sh "snakemake --cores 3 --jobs 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs --container-image ${DOCKER_IMAGE}"
                 
                 echo 'Printing final validation reports from Kubernetes calculation:'
                 sh 'cat results/sample1_gc.txt'
