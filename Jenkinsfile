@@ -46,14 +46,14 @@ pipeline {
                 sh 'rm -rf results/*'
                 
                 // Trigger snakemake with the kubernetes executor flag!
-                sh 'snakemake --cores 3 
+                sh 'snakemake --cores 3 --executor kubernetes'
                 
                 echo 'Printing final validation reports from Kubernetes calculation:'
                 sh 'cat results/sample1_gc.txt'
                 sh 'cat results/sample2_gc.txt'
                 sh 'cat results/sample3_gc.txt'
             }
-        }
+        } 
 
     }
 }
