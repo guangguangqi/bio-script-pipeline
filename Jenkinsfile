@@ -39,19 +39,21 @@ pipeline {
             }
         }
 
-        stage('4. Run Snakemake Orchestration') {
+        stage('4. Run Snakemake Orchestration on Kubernetes') {
             steps {
-                echo 'Executing Snakemake pipeline using built-in image assets...'
-                sh 'rm -f results/sample1_gc.txt'
+                echo 'Executing Snakemake pipeline via Kubernetes Pods...'
+                // Clean old test files
+                sh 'rm -rf results/*'
                 
-                // FIX: No more "-v" flags! We let the container read its own internal file.
-                // We use "> results/sample1_gc.txt" on the outside to capture the container's output.
-                sh "docker run --rm ${DOCKER_IMAGE} /app/data/sample1.fasta /app/results/sample1_gc.txt > results/sample1_gc.txt"
+                // Trigger snakemake with the kubernetes executor flag!
+                sh 'snakemake --cores 3 --executor kubernetes'
                 
-                echo 'Printing final Snakemake report validation:'
+                echo 'Printing final validation reports from Kubernetes calculation:'
                 sh 'cat results/sample1_gc.txt'
+                sh 'cat results/sample2_gc.txt'
+                sh 'cat results/sample3_gc.txt'
             }
-        }
+        } 
 
     }
 }
