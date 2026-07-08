@@ -18,10 +18,6 @@ pipeline {
             steps {
                 echo 'Building your bio-script container...'
                 sh "docker build -t ${DOCKER_IMAGE} ."
-                
-                echo 'Loading image into local Minikube cluster cache...'
-                // FIX: Explicitly direct minikube to look inside the mounted laptop directory for the cluster state
-                sh "minikube image load ${DOCKER_IMAGE} --minikube-home=/home/qiqi5/.minikube"
             }
         }
 
@@ -46,11 +42,11 @@ pipeline {
         stage('4. Run Snakemake Orchestration on Kubernetes') {
             steps {
                 echo 'Executing Snakemake pipeline via Kubernetes Pods...'
+                // Clean old test files
                 sh 'rm -rf results/*'
                 
-                // FIX: Removed the unsupported '--k8s-image-pull-policy' flag. 
-                // Since the image is now cached inside Minikube, K8s will run it instantly!
-                sh "snakemake --cores 3 --jobs 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs --container-image ${DOCKER_IMAGE}"
+                // Trigger snakemake with the kubernetes executor flag!
+                sh 'snakemake --cores 3 --executor kubernetes'
                 
                 echo 'Printing final validation reports from Kubernetes calculation:'
                 sh 'cat results/sample1_gc.txt'
