@@ -44,9 +44,8 @@ pipeline {
                 echo 'Executing Snakemake pipeline via Kubernetes Pods...'
                 sh 'rm -rf results/*'
                 
-                // FIX: Added `--shared-fs-usage` and `--default-storage-provider fs`
-                // This tells Snakemake 8+ that your K8s pods can read/write directly to your local file system workspace.
-                sh 'snakemake --cores 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs'
+                // FIX: Appended `--jobs 3` to satisfy the remote execution guardrail
+                sh 'snakemake --cores 3 --jobs 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs'
                 
                 echo 'Printing final validation reports from Kubernetes calculation:'
                 sh 'cat results/sample1_gc.txt'
