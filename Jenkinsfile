@@ -42,18 +42,18 @@ pipeline {
         stage('4. Run Snakemake Orchestration on Kubernetes') {
             steps {
                 echo 'Executing Snakemake pipeline via Kubernetes Pods...'
-                // Clean old test files
                 sh 'rm -rf results/*'
                 
-                // Trigger snakemake with the kubernetes executor flag!
-                sh 'snakemake --cores 3 --executor kubernetes'
+                // FIX: Added `--shared-fs-usage` and `--default-storage-provider fs`
+                // This tells Snakemake 8+ that your K8s pods can read/write directly to your local file system workspace.
+                sh 'snakemake --cores 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs'
                 
                 echo 'Printing final validation reports from Kubernetes calculation:'
                 sh 'cat results/sample1_gc.txt'
                 sh 'cat results/sample2_gc.txt'
                 sh 'cat results/sample3_gc.txt'
             }
-        } 
+        }
 
     }
 }
