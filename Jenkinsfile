@@ -19,9 +19,9 @@ pipeline {
                 echo 'Building your bio-script container...'
                 sh "docker build -t ${DOCKER_IMAGE} ."
                 
-                // FIX: Force Minikube to load the image you just built into the cluster node cache!
                 echo 'Loading image into local Minikube cluster cache...'
-                sh "minikube image load ${DOCKER_IMAGE}"
+                // FIX: Explicitly direct minikube to look inside the mounted laptop directory for the cluster state
+                sh "minikube image load ${DOCKER_IMAGE} --minikube-home=/home/qiqi5/.minikube"
             }
         }
 
