@@ -18,6 +18,10 @@ pipeline {
             steps {
                 echo 'Building your bio-script container...'
                 sh "docker build -t ${DOCKER_IMAGE} ."
+                
+                // FIX: Force Minikube to load the image you just built into the cluster node cache!
+                echo 'Loading image into local Minikube cluster cache...'
+                sh "minikube image load ${DOCKER_IMAGE}"
             }
         }
 
@@ -44,10 +48,9 @@ pipeline {
                 echo 'Executing Snakemake pipeline via Kubernetes Pods...'
                 sh 'rm -rf results/*'
                 
-                // 【终极通关参数】
-                // 我们在末尾追加了: --k8s-image-pull-policy Never
-                // 这将彻底斩断 K8s 联网拉取镜像的念头，强迫其读取本地 Minikube 环境里刚刚编译好的缓存，实现毫秒级瞬间开机！
-                sh "snakemake --cores 3 --jobs 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs --container-image ${DOCKER_IMAGE} --k8s-image-pull-policy Never"
+                // FIX: Removed the unsupported '--k8s-image-pull-policy' flag. 
+                // Since the image is now cached inside Minikube, K8s will run it instantly!
+                sh "snakemake --cores 3 --jobs 3 --executor kubernetes --shared-fs-usage input-output persistence source-cache --default-storage-provider fs --container-image ${DOCKER_IMAGE}"
                 
                 echo 'Printing final validation reports from Kubernetes calculation:'
                 sh 'cat results/sample1_gc.txt'
@@ -55,6 +58,7 @@ pipeline {
                 sh 'cat results/sample3_gc.txt'
             }
         }
+
     }
 }
 
