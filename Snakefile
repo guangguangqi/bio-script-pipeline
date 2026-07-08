@@ -11,12 +11,13 @@ rule calculate_gc:
         fasta = "data/{sample}.fasta"
     output:
         report = "results/{sample}_gc.txt"
-    resources:
-        # Requesting a valid 1 CPU so the Kubernetes API accepts it
-        kubernetes_cpu = 1,
-        kubernetes_mem = "256M"
-    container:
-        "docker://guangqi99/bio-script:1.0"
     shell:
-        "python /app/count_bases.py {input.fasta} {output.report}"
+        # We invoke Docker explicitly, mounting the workspace pwd relative to the executor system
+        # This completely decouples Snakemake from needing internal container dependencies!
+        """
+        docker run --rm \
+          -v $(pwd)/data:/app/data \
+          -v $(pwd)/results:/app/results \
+          guangqi99/bio-script:1.0 /app/data/{wildcards.sample}.fasta /app/results/{wildcards.sample}_gc.txt
+        """
 
